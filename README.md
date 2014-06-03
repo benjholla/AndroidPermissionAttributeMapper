@@ -1,0 +1,4 @@
+AndroidPermissionToPermissionGroupMapper
+========================================
+
+Quick and dirty code to recover the mapping of Android Permissions to their corresponding Permission Group's from the Android source
