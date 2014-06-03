@@ -1,7 +1,7 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,11 +36,11 @@ public class Main {
 			
 			// for each permission entry record the permission group 
 			// as a key and the permission as a value
-			HashMap<String,LinkedList<String>> permissionGroupToPermissionsMapping = new HashMap<String,LinkedList<String>>();
+			HashMap<String,HashSet<String>> permissionGroupToPermissionsMapping = new HashMap<String,HashSet<String>>();
 			
 			// for each permission entry record the permission 
 			// as a key and the protection level as a value
-			HashMap<String,LinkedList<String>> protectionLevelToPermissionMapping = new HashMap<String,LinkedList<String>>();
+			HashMap<String,HashSet<String>> protectionLevelToPermissionMapping = new HashMap<String,HashSet<String>>();
 			
 			// iterate over permissions and collect attributes
 			NodeList permissions = androidManifest.getElementsByTagName("permission");
@@ -48,24 +48,26 @@ public class Main {
 				Element permission = (Element) permissions.item(i);
 				String permissionName = permission.getAttribute("android:name");
 				String permissionGroup = permission.getAttribute("android:permissionGroup");
-				String protectionLevel = permission.getAttribute("android:protectionLevel");
+				String protectionLevelString = permission.getAttribute("android:protectionLevel");
 				
 				// add the permission group mapping for permission
 				if(permissionGroupToPermissionsMapping.containsKey(permissionGroup)){
 					permissionGroupToPermissionsMapping.get(permissionGroup).add(permissionName);
 				} else {
-					LinkedList<String> permissionNames = new LinkedList<String>();
+					HashSet<String> permissionNames = new HashSet<String>();
 					permissionNames.add(permissionName);
 					permissionGroupToPermissionsMapping.put(permissionGroup, permissionNames);
 				}
 				
 				// add the protection level mapping for permission
-				if(protectionLevelToPermissionMapping.containsKey(protectionLevel)){
-					protectionLevelToPermissionMapping.get(protectionLevel).add(permissionName);
-				} else {
-					LinkedList<String> permissionNames = new LinkedList<String>();
-					permissionNames.add(permissionName);
-					protectionLevelToPermissionMapping.put(protectionLevel, permissionNames);
+				for(String protectionLevel : protectionLevelString.split("\\|")){
+					if(protectionLevelToPermissionMapping.containsKey(protectionLevel)){
+						protectionLevelToPermissionMapping.get(protectionLevel).add(permissionName);
+					} else {
+						HashSet<String> permissionNames = new HashSet<String>();
+						permissionNames.add(permissionName);
+						protectionLevelToPermissionMapping.put(protectionLevel, permissionNames);
+					}
 				}
 			}
 			
